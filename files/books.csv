@@ -1,0 +1,6 @@
+id,name,pageNumber,stockNumber,stockId,price,isbn,authorId,authorName
+1,A Tale of Two Cities,320,10,21AC,15.3,9780451530578,101,Charles Dickens
+2,The Hobbit,376,10,44UY,24,9780547928227,202,J. R. R. Tolkien
+3,Harry Potter and the Philosophers Stone,560,10,22OL,32.2,9781408855898,303,J. K. Rowling
+4,The Little Prince,102,10,09UJ,7.8,9781853261589,404,Antoine de Saint-Exupéry
+5,Dream of the Red Chamber,350,10,77II,17,9780385093798,505,Cao Xueqin

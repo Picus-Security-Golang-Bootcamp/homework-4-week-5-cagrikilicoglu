@@ -76,7 +76,7 @@ func (b *BookRepository) FindAllBooksUnderPrice(price float32) ([]Book, error) {
 		return nil, result.Error
 	}
 	if len(books) == 0 {
-		return nil, fmt.Errorf("There is no books in the stock under %.2f\n", price)
+		return nil, fmt.Errorf("There is no books in the stock under %.2f", price)
 	}
 	return books, nil
 }
@@ -150,7 +150,7 @@ func (b *BookRepository) BuyByBookID(id string, num int) error {
 		b.db.Model(&book).Update("stock_number", book.StockNumber-num)
 		book.AfterOrder(num)
 	} else {
-		return fmt.Errorf("Not enough stock for %s, please order less than %d book/s.\n", book.Name, book.StockNumber)
+		return fmt.Errorf("Not enough stock for %s, please order less than %d book/s.", book.Name, book.StockNumber)
 	}
 
 	return nil

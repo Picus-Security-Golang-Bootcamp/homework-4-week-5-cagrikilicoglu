@@ -12,8 +12,9 @@ type ApiErr interface {
 	Error() string
 }
 type ApiError struct {
-	ErrStatus int    `json:"code,omitempty"`
-	ErrError  string `json:"code,omitempty"`
+	ErrStatus int         `json:"code,omitempty"`
+	ErrError  string      `json:"message,omitempty"`
+	ErrCauses interface{} `json:"-"`
 }
 
 var (
@@ -23,28 +24,59 @@ var (
 	NotFound            = errors.New("Not Found")
 	BadQueryParams      = errors.New("Bad Query Params")
 	InternalServerError = errors.New("Internal Server Error")
+	MissingFields       = errors.New("Missing fields")
+	ExistsObjectIDError = errors.New("Object with given id already exists")
 )
 
-func (a *ApiError) Status() int {
+func (a ApiError) Status() int {
 	return a.ErrStatus
 }
 
-func (a *ApiError) Error() string {
-	return fmt.Sprintf("status: %d - errors: %s", a.ErrStatus, a.ErrError)
+func (a ApiError) Error() string {
+	return fmt.Sprintf("status: %d - errors: %s - causes: %v", a.ErrStatus, a.ErrError, a.ErrCauses)
 }
 
-func NewApiError(code int, err string) ApiError {
+func NewApiError(code int, err string, causes interface{}) ApiError {
 	return ApiError{
 		ErrStatus: code,
 		ErrError:  err,
+		ErrCauses: causes,
 	}
 }
 
-func ParseErrors(err error) ApiError {
+func ParseErrors(err error) ApiErr {
 	switch {
 	case strings.Contains(err.Error(), "json: unsupported"):
-		return NewApiError(http.StatusBadRequest, CannotMarshal.Error())
+		return NewApiError(http.StatusBadRequest, CannotMarshal.Error(), err)
+	case strings.Contains(err.Error(), "not found"):
+		return NewApiError(http.StatusNotFound, NotFound.Error(), err)
+	case strings.Contains(err.Error(), "is required"):
+		return NewApiError(http.StatusBadRequest, MissingFields.Error(), err)
+	case strings.Contains(err.Error(), "SQLSTATE"):
+		return parseSqlErrors(err)
+	case strings.Contains(err.Error(), "Unmarshal"):
+		return NewApiError(http.StatusBadRequest, BadRequest.Error(), err)
+
 	default:
-		return NewApiError(http.StatusBadRequest, NotFound.Error())
+		if apiErr, ok := err.(ApiErr); ok {
+			return apiErr
+		}
+		return NewInternalServerError(err)
 	}
+}
+
+func parseSqlErrors(err error) ApiErr {
+	if strings.Contains(err.Error(), "23505") {
+		return NewApiError(http.StatusBadRequest, ExistsObjectIDError.Error(), err)
+	}
+	return NewApiError(http.StatusBadRequest, BadRequest.Error(), err)
+}
+
+func NewInternalServerError(causes interface{}) ApiErr {
+	result := ApiError{
+		ErrStatus: http.StatusInternalServerError,
+		ErrError:  InternalServerError.Error(),
+		ErrCauses: causes,
+	}
+	return result
 }

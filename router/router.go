@@ -3,7 +3,9 @@ package router
 import (
 	"bookApp/domain/author"
 	"bookApp/domain/book"
+	"bookApp/router/httpErrors"
 	"encoding/json"
+	"log"
 	"net/http"
 	"strconv"
 
@@ -23,6 +25,7 @@ var (
 func Handle(mr *mux.Router) {
 	mr.HandleFunc("/", HomeHandler)
 
+	// getleri http.methodget'e çevir
 	b := mr.PathPrefix("/books").Subrouter()
 	b.HandleFunc("/", GetBooks).Methods("GET")
 	b.HandleFunc("/all", GetBooksInludingDeleted).Methods("GET")
@@ -46,6 +49,13 @@ func Handle(mr *mux.Router) {
 	// a.HandleFunc("", GetBooksOfAuthorByName).Methods("GET").Queries("name", "{name}")
 }
 
+// type ApiResponse struct {
+// 	Payload interface{} `json:"data"`
+// }
+
+// type ErrorResponse struct {
+// }
+
 func HomeHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("Welcome to the book store\n"))
@@ -53,15 +63,12 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 
 func GetBooks(w http.ResponseWriter, r *http.Request) {
 	// r.Header.Get("Content-Type") != "application/json"
-
+	// data := ApiResponse{}
+	// var err error
 	books, err := BookRepo.FindAll()
 	if err != nil {
 		w.Write([]byte(http.StatusText(http.StatusBadRequest)))
 	}
-	// bytes, err := json.Marshal(books)
-	// if err != nil {
-	// 	w.Write([]byte(http.StatusText(http.StatusBadRequest)))
-	// }
 	respondWithJson(w, http.StatusOK, books)
 }
 
@@ -230,16 +237,19 @@ func GetBooksOfAuthorByName(w http.ResponseWriter, r *http.Request) {
 }
 
 func respondWithJson(w http.ResponseWriter, code int, payload interface{}) {
+
 	response, err := json.Marshal(payload)
 	if err != nil {
-		// respond with error'a çevir
-		w.Write([]byte(http.StatusText(http.StatusBadRequest)))
+		log.Println(err)
+		respondWithError(w, httpErrors.ParseErrors(err))
+		return
+
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(code)
 	w.Write(response)
 }
 
-func respondWithError(w http.ResponseWriter, code int, message string) {
-	respondWithJson(w, code, map[string]string{"error": message})
+func respondWithError(w http.ResponseWriter, a httpErrors.ApiError) {
+	respondWithJson(w, a.ErrStatus, a.ErrError)
 }

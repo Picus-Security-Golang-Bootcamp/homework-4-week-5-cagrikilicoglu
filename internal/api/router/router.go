@@ -1,9 +1,9 @@
 package router
 
 import (
-	"bookApp/domain/author"
-	"bookApp/domain/book"
-	"bookApp/router/httpErrors"
+	"bookApp/internal/api/router/httpErrors"
+	"bookApp/internal/domain/author"
+	"bookApp/internal/domain/book"
 	"encoding/json"
 	"net/http"
 	"strconv"
@@ -24,25 +24,24 @@ var (
 func Handle(mr *mux.Router) {
 	mr.HandleFunc("/", HomeHandler)
 
-	// getleri http.methodget'e çevir
 	b := mr.PathPrefix("/books").Subrouter()
-	b.HandleFunc("/", GetBooks).Methods("GET")
-	b.HandleFunc("/all", GetBooksInludingDeleted).Methods("GET")
-	b.HandleFunc("/stock", GetBooksInludingDeleted).Methods("GET")
-	b.HandleFunc("/price/{priceunder}", GetBooksUnderPrice).Methods("GET")
-	b.HandleFunc("", GetBookByBookID).Methods("GET").Queries("id", "{id}")
+	b.HandleFunc("/", GetBooks).Methods(http.MethodGet)
+	b.HandleFunc("/all", GetBooksInludingDeleted).Methods(http.MethodGet)
+	b.HandleFunc("/stock", GetBooksInludingDeleted).Methods(http.MethodGet)
+	b.HandleFunc("/price/{priceunder}", GetBooksUnderPrice).Methods(http.MethodGet)
+	b.HandleFunc("", GetBookByBookID).Methods(http.MethodGet).Queries("id", "{id}")
 	// burayı farklı şekilde handle edbeiliriz
-	b.HandleFunc("", GetBookByISBN).Methods("GET").Queries("isbn", "{isbn}")
-	b.HandleFunc("", GetBookByName).Methods("GET").Queries("name", "{name}")
-	b.HandleFunc("", GetBooksByAuthorName).Methods("GET").Queries("author", "{author}")
-	b.HandleFunc("", DeleteBookById).Methods("DELETE").Queries("id", "{id}")
-	b.HandleFunc("/order", BuyBookById).Methods("PATCH").Queries("id", "{id}", "quantity", "{quantity}")
+	b.HandleFunc("", GetBookByISBN).Methods(http.MethodGet).Queries("isbn", "{isbn}")
+	b.HandleFunc("", GetBookByName).Methods(http.MethodGet).Queries("name", "{name}")
+	b.HandleFunc("", GetBooksByAuthorName).Methods(http.MethodGet).Queries("author", "{author}")
+	b.HandleFunc("", DeleteBookById).Methods(http.MethodDelete).Queries("id", "{id}")
+	b.HandleFunc("/order", BuyBookById).Methods(http.MethodPatch).Queries("id", "{id}", "quantity", "{quantity}")
 
 	a := mr.PathPrefix("/authors").Subrouter()
-	a.HandleFunc("/", GetAuthorsWithBookInfo).Methods("GET")
-	a.HandleFunc("/*", GetAuthorsWithoutBookInfo).Methods("GET")
-	a.HandleFunc("", GetAuthorByID).Methods("GET").Queries("id", "{id}")
-	a.HandleFunc("", GetAuthorByName).Methods("GET").Queries("name", "{name}")
+	a.HandleFunc("/", GetAuthorsWithBookInfo).Methods(http.MethodGet)
+	a.HandleFunc("/*", GetAuthorsWithoutBookInfo).Methods(http.MethodGet)
+	a.HandleFunc("", GetAuthorByID).Methods(http.MethodGet).Queries("id", "{id}")
+	a.HandleFunc("", GetAuthorByName).Methods(http.MethodGet).Queries("name", "{name}")
 
 	// aşağıdaki fonksiyon çalışmıyor
 	// a.HandleFunc("", GetBooksOfAuthorByName).Methods("GET").Queries("name", "{name}")

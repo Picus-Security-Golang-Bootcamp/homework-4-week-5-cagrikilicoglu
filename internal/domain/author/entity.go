@@ -1,7 +1,7 @@
 package author
 
 import (
-	"bookApp/domain/book"
+	"bookApp/internal/domain/book"
 	"fmt"
 	"strings"
 

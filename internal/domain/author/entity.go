@@ -10,8 +10,8 @@ import (
 
 type Author struct {
 	gorm.Model
-	ID    string
-	Name  string
+	ID    string      `json:"id"`
+	Name  string      `json:"name"`
 	Books []book.Book `gorm:"foreignKey:AuthorID;references:ID"`
 }
 

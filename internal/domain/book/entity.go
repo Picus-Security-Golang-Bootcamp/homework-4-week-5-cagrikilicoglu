@@ -8,15 +8,15 @@ import (
 
 type Book struct {
 	gorm.Model
-	ID          string
-	Name        string
-	PageNumber  uint
-	StockNumber int
-	StockID     string
-	Price       float32
-	ISBN        string
-	AuthorID    string
-	AuthorName  string
+	ID          string  `json:"id" gorm:"unique"`
+	Name        string  `json:"name"`
+	PageNumber  uint    `json:"pageNumber"`
+	StockNumber int     `json:"stockNumber"`
+	StockID     string  `json:"stockId" gorm:"unique"`
+	Price       float32 `json:"price"`
+	ISBN        string  `json:"isbn"`
+	AuthorID    string  `json:"authorId"`
+	AuthorName  string  `json:"authorName"`
 }
 
 // ToString: Convert book data into more readable string

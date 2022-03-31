@@ -11,11 +11,6 @@ import (
 	"github.com/gorilla/mux"
 )
 
-// var r mux.Router{}
-// type MuxRouter struct {
-// 	MuxRouter *mux.Router
-// }
-
 var (
 	BookRepo   *book.BookRepository
 	AuthorRepo *author.AuthorRepository
@@ -30,7 +25,6 @@ func Handle(mr *mux.Router) {
 	b.HandleFunc("/stock", GetBooksInludingDeleted).Methods(http.MethodGet)
 	b.HandleFunc("/price/{priceunder}", GetBooksUnderPrice).Methods(http.MethodGet)
 	b.HandleFunc("", GetBookByBookID).Methods(http.MethodGet).Queries("id", "{id}")
-	// burayı farklı şekilde handle edbeiliriz
 	b.HandleFunc("", GetBookByISBN).Methods(http.MethodGet).Queries("isbn", "{isbn}")
 	b.HandleFunc("", GetBookByName).Methods(http.MethodGet).Queries("name", "{name}")
 	b.HandleFunc("", GetBooksByAuthorName).Methods(http.MethodGet).Queries("author", "{author}")
@@ -51,8 +45,23 @@ type ApiResponse struct {
 	Payload interface{} `json:"data"`
 }
 
-// type ErrorResponse struct {
-// }
+func respondWithJson(w http.ResponseWriter, code int, payload interface{}) {
+	data := ApiResponse{
+		Payload: payload,
+	}
+	response, err := json.Marshal(data)
+	if err != nil {
+		respondWithError(w, httpErrors.ParseErrors(err))
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(code)
+	w.Write(response)
+}
+
+func respondWithError(w http.ResponseWriter, a httpErrors.ApiErr) {
+	respondWithJson(w, a.Status(), a.Error())
+}
 
 func HomeHandler(w http.ResponseWriter, r *http.Request) {
 	welcomeMessage := "Welcome to the book store"
@@ -142,7 +151,6 @@ func GetBooksByAuthorName(w http.ResponseWriter, r *http.Request) {
 	respondWithJson(w, http.StatusOK, books)
 }
 func DeleteBookById(w http.ResponseWriter, r *http.Request) {
-	// vars := r.URL.Query()
 	vars := mux.Vars(r)
 	id := vars["id"]
 	err := BookRepo.DeleteByBookID(id)
@@ -226,22 +234,4 @@ func GetBooksOfAuthorByName(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	respondWithJson(w, http.StatusOK, authors)
-}
-
-func respondWithJson(w http.ResponseWriter, code int, payload interface{}) {
-	data := ApiResponse{
-		Payload: payload,
-	}
-	response, err := json.Marshal(data)
-	if err != nil {
-		respondWithError(w, httpErrors.ParseErrors(err))
-		return
-	}
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(code)
-	w.Write(response)
-}
-
-func respondWithError(w http.ResponseWriter, a httpErrors.ApiErr) {
-	respondWithJson(w, a.Status(), a.Error())
 }

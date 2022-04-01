@@ -63,7 +63,7 @@ func (a *AuthorRepository) FindAuthorsWithoutBookInfo() ([]entities.Author, erro
 // the search is elastic and case insensitive
 func (a *AuthorRepository) FindByAuthorID(ID string) (*entities.Author, error) {
 	author := entities.Author{}
-	result := a.db.Where(&entities.Author{ID: ID}).First(&author)
+	result := a.db.Preload("Books").Where(&entities.Author{ID: ID}).First(&author)
 	if result.Error != nil {
 		return nil, result.Error
 	}

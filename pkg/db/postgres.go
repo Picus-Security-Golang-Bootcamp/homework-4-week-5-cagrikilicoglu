@@ -8,7 +8,6 @@ import (
 	"gorm.io/gorm"
 )
 
-// defer ekle
 func NewPsqlDB() (*gorm.DB, error) {
 	dsn := fmt.Sprintf("host=%s port=%s user=%s dbname=%s sslmode=disable password=%s",
 		os.Getenv("BOOK_APP_HOST"),

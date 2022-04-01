@@ -16,18 +16,19 @@ type Book struct {
 	Price       float32 `json:"price"`
 	ISBN        string  `json:"isbn"`
 	AuthorID    string  `json:"authorID"`
-	Author      *Author `json:",omitempty"`
+	Author      *Author `json:",omitempty" gorm:"OnDelete:SET NULL"`
 }
 
 // ToString: Convert book data into more readable string
 func (b *Book) ToString() string {
-	return fmt.Sprintf("ID: %s, Name: %s, Page Number: %d, Stock Number: %d, StockID: %s, Price: %.2f, ISBN: %s, Author ID: %s, Author Name: %s\n", b.ID, b.Name, b.PageNumber, b.StockNumber, b.StockID, b.Price, b.ISBN, b.Author.ID, b.Author.Name)
+
+	return fmt.Sprintf("ID: %s, Name: %s, Page Number: %d, Stock Number: %d, StockID: %s, Price: %.2f, ISBN: %s, Author ID: %s\n", b.ID, b.Name, b.PageNumber, b.StockNumber, b.StockID, b.Price, b.ISBN, b.AuthorID)
 }
 
 // BeforeDelete: Print book name before deleting.
 func (b *Book) BeforeDelete(tx *gorm.DB) error {
 	fmt.Printf("Book %s is deleting...\n", b.Name)
-	fmt.Printf(b.ToString())
+	fmt.Println(b.ToString())
 	return nil
 }
 

@@ -17,29 +17,30 @@ var (
 )
 
 func Handle(mr *mux.Router) {
+
+	// home handler
 	mr.HandleFunc("/", HomeHandler)
 
+	// handlers regarding books
 	b := mr.PathPrefix("/books").Subrouter()
 	b.HandleFunc("/", GetBooks).Methods(http.MethodGet)
 	b.HandleFunc("/all", GetBooksInludingDeleted).Methods(http.MethodGet)
-	b.HandleFunc("/stock", GetBooksInludingDeleted).Methods(http.MethodGet)
+	b.HandleFunc("/stock", GetBooksInStock).Methods(http.MethodGet)
 	b.HandleFunc("/price/{priceunder}", GetBooksUnderPrice).Methods(http.MethodGet)
 	b.HandleFunc("", GetBookByBookID).Methods(http.MethodGet).Queries("id", "{id}")
 	b.HandleFunc("", GetBookByISBN).Methods(http.MethodGet).Queries("isbn", "{isbn}")
 	b.HandleFunc("", GetBookByName).Methods(http.MethodGet).Queries("name", "{name}")
-	b.HandleFunc("", GetBooksByAuthorName).Methods(http.MethodGet).Queries("author", "{author}")
-	b.HandleFunc("", DeleteBookById).Methods(http.MethodDelete).Queries("id", "{id}")
+	b.HandleFunc("/delete", DeleteBookById).Methods(http.MethodDelete).Queries("id", "{id}")
 	b.HandleFunc("/order", BuyBookById).Methods(http.MethodPatch).Queries("id", "{id}", "quantity", "{quantity}")
 	b.HandleFunc("/add", AddBookToDatabase).Methods(http.MethodPost)
 
+	// handlers regarding authors
 	a := mr.PathPrefix("/authors").Subrouter()
 	a.HandleFunc("/", GetAuthorsWithBookInfo).Methods(http.MethodGet)
 	a.HandleFunc("/*", GetAuthorsWithoutBookInfo).Methods(http.MethodGet)
 	a.HandleFunc("", GetAuthorByID).Methods(http.MethodGet).Queries("id", "{id}")
 	a.HandleFunc("", GetAuthorByName).Methods(http.MethodGet).Queries("name", "{name}")
-
-	// aşağıdaki fonksiyon çalışmıyor
-	// a.HandleFunc("", GetBooksOfAuthorByName).Methods("GET").Queries("name", "{name}")
+	a.HandleFunc("/books", GetBooksOfAuthorByName).Methods(http.MethodGet).Queries("name", "{name}")
 }
 
 type ApiResponse struct {
@@ -141,16 +142,6 @@ func GetBookByName(w http.ResponseWriter, r *http.Request) {
 	respondWithJson(w, http.StatusOK, books)
 }
 
-func GetBooksByAuthorName(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	author := vars["author"]
-	books, err := BookRepo.FindByAuthorName(author)
-	if err != nil {
-		respondWithError(w, httpErrors.ParseErrors(err))
-		return
-	}
-	respondWithJson(w, http.StatusOK, books)
-}
 func DeleteBookById(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id := vars["id"]

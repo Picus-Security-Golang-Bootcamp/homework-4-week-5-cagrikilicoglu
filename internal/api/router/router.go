@@ -2,6 +2,7 @@ package router
 
 import (
 	"bookApp/internal/api/router/httpErrors"
+	"bookApp/internal/domain/entities"
 	"bookApp/internal/domain/repos"
 	"encoding/json"
 	"net/http"
@@ -29,6 +30,7 @@ func Handle(mr *mux.Router) {
 	b.HandleFunc("", GetBooksByAuthorName).Methods(http.MethodGet).Queries("author", "{author}")
 	b.HandleFunc("", DeleteBookById).Methods(http.MethodDelete).Queries("id", "{id}")
 	b.HandleFunc("/order", BuyBookById).Methods(http.MethodPatch).Queries("id", "{id}", "quantity", "{quantity}")
+	b.HandleFunc("/add", AddBookToDatabase).Methods(http.MethodPost)
 
 	a := mr.PathPrefix("/authors").Subrouter()
 	a.HandleFunc("/", GetAuthorsWithBookInfo).Methods(http.MethodGet)
@@ -178,6 +180,21 @@ func BuyBookById(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte(http.StatusText(http.StatusOK)))
+}
+
+func AddBookToDatabase(w http.ResponseWriter, r *http.Request) {
+	var newBook entities.Book
+	err := json.NewDecoder(r.Body).Decode(&newBook)
+	if err != nil {
+		respondWithError(w, httpErrors.ParseErrors(err))
+		return
+	}
+	err = BookRepo.AddBook(newBook)
+	if err != nil {
+		respondWithError(w, httpErrors.ParseErrors(err))
+		return
+	}
+	respondWithJson(w, http.StatusOK, newBook)
 }
 
 func GetAuthorsWithBookInfo(w http.ResponseWriter, r *http.Request) {

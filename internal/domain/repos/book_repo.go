@@ -34,8 +34,18 @@ func (b *BookRepository) InsertBookData(path string) error {
 	}
 	for _, book := range books {
 		b.db.Where(entities.Book{ID: book.ID}).Attrs(entities.Book{ID: book.ID, Name: book.Name, PageNumber: book.PageNumber, StockNumber: book.StockNumber, StockID: book.StockID, Price: book.Price, ISBN: book.ISBN, Author: &entities.Author{ID: book.Author.ID, Name: book.Author.Name}}).FirstOrCreate(&book)
-		// b.db.Omit("Author").Where(entities.Book{ID: book.ID}).FirstOrCreate(&book)
 	}
+	return nil
+}
+
+func (b *BookRepository) AddBook(book entities.Book) error {
+
+	result := b.db.Where(entities.Book{ID: book.ID}).Attrs(entities.Book{ID: book.ID, Name: book.Name, PageNumber: book.PageNumber, StockNumber: book.StockNumber, StockID: book.StockID, Price: book.Price, ISBN: book.ISBN, Author: &entities.Author{ID: book.Author.ID, Name: book.Author.Name}}).FirstOrCreate(&book)
+
+	if result.Error != nil {
+		return result.Error
+	}
+
 	return nil
 }
 

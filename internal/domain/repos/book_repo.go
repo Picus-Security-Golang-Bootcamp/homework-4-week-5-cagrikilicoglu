@@ -1,6 +1,7 @@
-package book
+package repos
 
 import (
+	"bookApp/internal/domain/entities"
 	"fmt"
 
 	"gorm.io/gorm"
@@ -22,25 +23,26 @@ func (b *BookRepository) SetupDatabase(path string) {
 
 // Migrations: automatically migrates database of Books
 func (b *BookRepository) Migrations() {
-	b.db.AutoMigrate(&Book{})
+	b.db.AutoMigrate(&entities.Book{})
 }
 
 // InsertBookData: insert book data to database by the given input path
 func (b *BookRepository) InsertBookData(path string) error {
-	books, err := readBooksWithWorkerPool(path)
+	books, _, err := readDataWithWorkerPool(path)
 	if err != nil {
 		return err
 	}
 	for _, book := range books {
-		b.db.Where(Book{ID: book.ID}).Attrs(Book{ID: book.ID, Name: book.Name, PageNumber: book.PageNumber, StockNumber: book.StockNumber, StockID: book.StockID, Price: book.Price, ISBN: book.ISBN, AuthorID: book.AuthorID, AuthorName: book.AuthorName}).FirstOrCreate(&book)
+		b.db.Where(entities.Book{ID: book.ID}).Attrs(entities.Book{ID: book.ID, Name: book.Name, PageNumber: book.PageNumber, StockNumber: book.StockNumber, StockID: book.StockID, Price: book.Price, ISBN: book.ISBN, Author: &entities.Author{ID: book.Author.ID, Name: book.Author.Name}}).FirstOrCreate(&book)
+		// b.db.Omit("Author").Where(entities.Book{ID: book.ID}).FirstOrCreate(&book)
 	}
 	return nil
 }
 
 // FindAll(): return all the books in database
-func (b *BookRepository) FindAll() ([]Book, error) {
-	books := []Book{}
-	result := b.db.Find(&books)
+func (b *BookRepository) FindAll() ([]entities.Book, error) {
+	books := []entities.Book{}
+	result := b.db.Preload("Author").Find(&books)
 	if result.Error != nil {
 		return nil, result.Error
 	}
@@ -48,8 +50,8 @@ func (b *BookRepository) FindAll() ([]Book, error) {
 }
 
 // FindAllIncludingDeleted(): return all the books including the deleted ones in database
-func (b *BookRepository) FindAllIncludingDeleted() ([]Book, error) {
-	books := []Book{}
+func (b *BookRepository) FindAllIncludingDeleted() ([]entities.Book, error) {
+	books := []entities.Book{}
 	result := b.db.Unscoped().Find(&books)
 	if result.Error != nil {
 		return nil, result.Error
@@ -59,8 +61,8 @@ func (b *BookRepository) FindAllIncludingDeleted() ([]Book, error) {
 
 // FindAllInStock(): find all books that are currently in stock (stock number > 0).
 // Warning: this function is not for showing deleted books, it checks the stock numbers.
-func (b *BookRepository) FindAllInStock() ([]Book, error) {
-	books := []Book{}
+func (b *BookRepository) FindAllInStock() ([]entities.Book, error) {
+	books := []entities.Book{}
 	result := b.db.Where("stock_number > ?", 0).Find(&books)
 	if result.Error != nil {
 		return nil, result.Error
@@ -69,8 +71,8 @@ func (b *BookRepository) FindAllInStock() ([]Book, error) {
 }
 
 // FindAllUnderPrice(): find all books under a given price input and also that are currently in stock.
-func (b *BookRepository) FindAllBooksUnderPrice(price float32) ([]Book, error) {
-	books := []Book{}
+func (b *BookRepository) FindAllBooksUnderPrice(price float32) ([]entities.Book, error) {
+	books := []entities.Book{}
 	result := b.db.Where("stock_number > ?", 0).Where("price < ?", price).Find(&books)
 	if result.Error != nil {
 		return nil, result.Error
@@ -82,8 +84,8 @@ func (b *BookRepository) FindAllBooksUnderPrice(price float32) ([]Book, error) {
 }
 
 // FindByBookID: returns the book with given ID input
-func (b *BookRepository) FindByBookID(ID string) (*Book, error) {
-	book := Book{}
+func (b *BookRepository) FindByBookID(ID string) (*entities.Book, error) {
+	book := entities.Book{}
 	result := b.db.First(&book, ID)
 	if result.Error != nil {
 		return nil, result.Error
@@ -92,9 +94,9 @@ func (b *BookRepository) FindByBookID(ID string) (*Book, error) {
 }
 
 // FindByBookISBN: returns the book with given ISBN input
-func (b *BookRepository) FindByBookISBN(ISBN string) (*Book, error) {
-	book := Book{}
-	result := b.db.Where(&Book{ISBN: ISBN}).Find(&book)
+func (b *BookRepository) FindByBookISBN(ISBN string) (*entities.Book, error) {
+	book := entities.Book{}
+	result := b.db.Where(&entities.Book{ISBN: ISBN}).Find(&book)
 	if result.Error != nil {
 		return nil, result.Error
 	}
@@ -103,8 +105,8 @@ func (b *BookRepository) FindByBookISBN(ISBN string) (*Book, error) {
 
 // FindByBookName: returns the book/s with given name input
 // the search is elastic and case insensitive
-func (b *BookRepository) FindByBookName(name string) ([]Book, error) {
-	books := []Book{}
+func (b *BookRepository) FindByBookName(name string) ([]entities.Book, error) {
+	books := []entities.Book{}
 	nameString := fmt.Sprintf("%%%s%%", name)
 	result := b.db.Where("name ILIKE ?", nameString).Find(&books)
 	if result.Error != nil {
@@ -115,8 +117,8 @@ func (b *BookRepository) FindByBookName(name string) ([]Book, error) {
 
 // FindByAuthorName: returns the book/s with given author name input
 // the search is elastic and case insensitive
-func (b *BookRepository) FindByAuthorName(name string) ([]Book, error) {
-	books := []Book{}
+func (b *BookRepository) FindByAuthorName(name string) ([]entities.Book, error) {
+	books := []entities.Book{}
 	nameString := fmt.Sprintf("%%%s%%", name)
 	result := b.db.Where("author_name ILIKE ?", nameString).Find(&books)
 	if result.Error != nil {

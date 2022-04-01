@@ -1,4 +1,4 @@
-package book
+package entities
 
 import (
 	"fmt"
@@ -8,20 +8,20 @@ import (
 
 type Book struct {
 	gorm.Model
-	ID          string  `json:"id" gorm:"unique"`
+	ID          string  `json:"ID" gorm:"unique"`
 	Name        string  `json:"name"`
 	PageNumber  uint    `json:"pageNumber"`
 	StockNumber int     `json:"stockNumber"`
 	StockID     string  `json:"stockId" gorm:"unique"`
 	Price       float32 `json:"price"`
 	ISBN        string  `json:"isbn"`
-	AuthorID    string  `json:"authorId"`
-	AuthorName  string  `json:"authorName"`
+	AuthorID    string  `json:"authorID"`
+	Author      *Author `json:",omitempty"`
 }
 
 // ToString: Convert book data into more readable string
 func (b *Book) ToString() string {
-	return fmt.Sprintf("ID: %s, Name: %s, Page Number: %d, Stock Number: %d, StockID: %s, Price: %.2f, ISBN: %s, Author ID: %s, Author Name: %s\n", b.ID, b.Name, b.PageNumber, b.StockNumber, b.StockID, b.Price, b.ISBN, b.AuthorID, b.AuthorName)
+	return fmt.Sprintf("ID: %s, Name: %s, Page Number: %d, Stock Number: %d, StockID: %s, Price: %.2f, ISBN: %s, Author ID: %s, Author Name: %s\n", b.ID, b.Name, b.PageNumber, b.StockNumber, b.StockID, b.Price, b.ISBN, b.Author.ID, b.Author.Name)
 }
 
 // BeforeDelete: Print book name before deleting.

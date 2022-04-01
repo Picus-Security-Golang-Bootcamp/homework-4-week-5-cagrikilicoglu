@@ -1,6 +1,7 @@
-package author
+package repos
 
 import (
+	"bookApp/internal/domain/entities"
 	"fmt"
 
 	"gorm.io/gorm"
@@ -22,25 +23,25 @@ func (a *AuthorRepository) SetupDatabase(path string) {
 
 // Migrations: automatically migrates database of Authors
 func (a *AuthorRepository) Migrations() {
-	a.db.AutoMigrate(&Author{})
+	a.db.AutoMigrate(&entities.Author{})
 }
 
 // InsertAuthorData: insert author data to database by the given input path
 func (a *AuthorRepository) InsertAuthorData(path string) error {
 
-	authors, err := readAuthorsWithWorkerPool(path)
+	_, authors, err := readDataWithWorkerPool(path)
 	if err != nil {
 		return err
 	}
 	for _, author := range authors {
-		a.db.Where(Author{ID: author.ID}).Attrs(Author{ID: author.ID, Name: author.Name}).FirstOrCreate(&author)
+		a.db.Where(entities.Author{ID: author.ID}).Attrs(entities.Author{ID: author.ID, Name: author.Name}).FirstOrCreate(&author)
 	}
 	return nil
 }
 
 // FindAuthorsWithBookInfo: Find all the authors with their book data
-func (a *AuthorRepository) FindAuthorsWithBookInfo() ([]Author, error) {
-	authors := []Author{}
+func (a *AuthorRepository) FindAuthorsWithBookInfo() ([]entities.Author, error) {
+	authors := []entities.Author{}
 	result := a.db.Preload("Books").Find(&authors)
 	if result.Error != nil {
 		return nil, result.Error
@@ -49,8 +50,8 @@ func (a *AuthorRepository) FindAuthorsWithBookInfo() ([]Author, error) {
 }
 
 // FindAuthorsWithBookInfo: Find all the authors without their book data
-func (a *AuthorRepository) FindAuthorsWithoutBookInfo() ([]Author, error) {
-	authors := []Author{}
+func (a *AuthorRepository) FindAuthorsWithoutBookInfo() ([]entities.Author, error) {
+	authors := []entities.Author{}
 	result := a.db.Find(&authors)
 	if result.Error != nil {
 		return nil, result.Error
@@ -60,9 +61,9 @@ func (a *AuthorRepository) FindAuthorsWithoutBookInfo() ([]Author, error) {
 
 // FindByAuthorID: returns the author with given ID input
 // the search is elastic and case insensitive
-func (a *AuthorRepository) FindByAuthorID(ID string) (*Author, error) {
-	author := Author{}
-	result := a.db.Where(&Author{ID: ID}).First(&author)
+func (a *AuthorRepository) FindByAuthorID(ID string) (*entities.Author, error) {
+	author := entities.Author{}
+	result := a.db.Where(&entities.Author{ID: ID}).First(&author)
 	if result.Error != nil {
 		return nil, result.Error
 	}
@@ -71,8 +72,8 @@ func (a *AuthorRepository) FindByAuthorID(ID string) (*Author, error) {
 
 // FindByAuthorName: returns the author with given name input
 // the search is elastic and case insensitive
-func (a *AuthorRepository) FindByAuthorName(name string) ([]Author, error) {
-	authors := []Author{}
+func (a *AuthorRepository) FindByAuthorName(name string) ([]entities.Author, error) {
+	authors := []entities.Author{}
 	nameString := fmt.Sprintf("%%%s%%", name)
 
 	result := a.db.Where("name ILIKE ?", nameString).Find(&authors)
@@ -84,8 +85,8 @@ func (a *AuthorRepository) FindByAuthorName(name string) ([]Author, error) {
 
 // FindBooksOfAuthorByName: returns the author with given name input as well as his/her books
 // the search is elastic and case insensitive
-func (a *AuthorRepository) FindBooksOfAuthorByName(name string) ([]Author, error) {
-	authors := []Author{}
+func (a *AuthorRepository) FindBooksOfAuthorByName(name string) ([]entities.Author, error) {
+	authors := []entities.Author{}
 	nameString := fmt.Sprintf("%%%s%%", name)
 
 	result := a.db.Preload("Books").Where("name ILIKE ?", nameString).Find(&authors)

@@ -2,8 +2,7 @@ package router
 
 import (
 	"bookApp/internal/api/router/httpErrors"
-	"bookApp/internal/domain/author"
-	"bookApp/internal/domain/book"
+	"bookApp/internal/domain/repos"
 	"encoding/json"
 	"net/http"
 	"strconv"
@@ -12,8 +11,8 @@ import (
 )
 
 var (
-	BookRepo   *book.BookRepository
-	AuthorRepo *author.AuthorRepository
+	BookRepo   *repos.BookRepository
+	AuthorRepo *repos.AuthorRepository
 )
 
 func Handle(mr *mux.Router) {

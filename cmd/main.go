@@ -2,8 +2,7 @@ package main
 
 import (
 	"bookApp/internal/api/router"
-	"bookApp/internal/domain/author"
-	"bookApp/internal/domain/book"
+	"bookApp/internal/domain/repos"
 	postgres "bookApp/pkg/db"
 	"context"
 	"log"
@@ -16,7 +15,7 @@ import (
 	"github.com/joho/godotenv"
 )
 
-func init() {
+func main() {
 	// Set environment variables
 	err := godotenv.Load()
 	if err != nil {
@@ -39,15 +38,12 @@ func init() {
 	log.Println("Postgress connected")
 
 	// Repositories
-	router.BookRepo = book.NewBookRepository(db)
-	router.AuthorRepo = author.NewAuthorRepository(db)
+	router.BookRepo = repos.NewBookRepository(db)
+	router.AuthorRepo = repos.NewAuthorRepository(db)
 
 	// Setup databases
-	router.BookRepo.SetupDatabase("./pkg/docs/books.csv")
-	router.AuthorRepo.SetupDatabase("./pkg/docs/authors.csv")
-
-}
-func main() {
+	router.BookRepo.SetupDatabase("./pkg/docs/data.csv")
+	router.AuthorRepo.SetupDatabase("./pkg/docs/data.csv")
 
 	// Create mux router
 	r := mux.NewRouter()

@@ -1,7 +1,6 @@
-package author
+package entities
 
 import (
-	"bookApp/internal/domain/book"
 	"fmt"
 	"strings"
 
@@ -10,9 +9,9 @@ import (
 
 type Author struct {
 	gorm.Model
-	ID    string      `json:"id"`
-	Name  string      `json:"name"`
-	Books []book.Book `gorm:"foreignKey:AuthorID;references:ID"`
+	ID    string `json:"ID" gorm:"unique"`
+	Name  string `json:"name"`
+	Books []Book `json:",omitempty"`
 }
 
 // ToString: Convert author data into more readable string

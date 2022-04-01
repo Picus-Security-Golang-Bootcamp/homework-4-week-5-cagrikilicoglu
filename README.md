@@ -9,23 +9,23 @@ The database are created by the app. The book and author data is read from csv f
 
 ## Endpoints and Requests
 
-### Home screen
+#### Home screen
 
     `GET /`
 
-### Get all the books currently in the database.
+#### Get all the books currently in the database.
 
     `GET /books/`
 
-### Get all the books including those deleted before.
+#### Get all the books including those deleted before.
 
     `GET /books/all`
 
-### Get only the books that are in stock.
+#### Get only the books that are in stock.
 
     `GET /books/stock`
 
-### Get books under a certain price of your preferance.
+#### Get books under a certain price of your preferance.
 
      `GET /price/{priceunder}`
 
@@ -33,7 +33,7 @@ The database are created by the app. The book and author data is read from csv f
 
         `GET /price/32`
 
-### Get a book by its ID.
+#### Get a book by its ID.
 
      `GET /books?id={id}`
 
@@ -41,7 +41,7 @@ The database are created by the app. The book and author data is read from csv f
 
         `GET /books?id=3`
 
-### Get a book by its ISBN.
+#### Get a book by its ISBN.
 
      `GET /books?isbn={isbn}`
 
@@ -49,7 +49,7 @@ The database are created by the app. The book and author data is read from csv f
 
         `GET /books?isbn=9781128355898`
 
-### Get books by its name. (elastic search)
+#### Get books by its name. (elastic search)
 
      `GET /books?name={name}`
 
@@ -57,7 +57,7 @@ The database are created by the app. The book and author data is read from csv f
 
         `GET /books?name=the`
 
-### Delete a book from database. (soft-delete)
+#### Delete a book from database. (soft-delete)
 
      `DELETE /books/delete?id={id}`
 
@@ -73,7 +73,7 @@ The database are created by the app. The book and author data is read from csv f
 
         `PATCH /books/order?id=5&quantity=2`
 
-### Add a new book to the database. (create the book on the database)
+#### Add a new book to the database. (create the book on the database)
 
     `POST /books/add`
 
@@ -81,15 +81,15 @@ The database are created by the app. The book and author data is read from csv f
 
         {"ID":"11","name":"Utopia","pageNumber":182,"stockNumber":20,"stockId":"11SF","price":14.7,"isbn":"9781128355898","authorID":"909","Author":{"ID":"909","name":"Thomas Moore"}}
 
-### Get all the authors in the database, with the books of the authors.
+#### Get all the authors in the database, with the books of the authors.
 
     `GET /authors/`
 
-### Get all the authors in the database, without the books of the authors.
+#### Get all the authors in the database, without the books of the authors.
 
     `GET /authors/*`
 
-### Get an author with his/her ID.
+#### Get an author with his/her ID.
 
     `GET /authors?id={id}`
 
@@ -97,7 +97,7 @@ The database are created by the app. The book and author data is read from csv f
 
         `GET /authors?id=101`
 
-### Get authors by their name. (elastic search)
+#### Get authors by their name. (elastic search)
 
      `GET /authors?name={name}`
 
@@ -105,7 +105,7 @@ The database are created by the app. The book and author data is read from csv f
 
         `GET /authors?name=j.`
 
-### Get the books of authors by their name. (elastic search)
+#### Get the books of authors by their name. (elastic search)
 
      `GET /authors/books?name={name}`
 

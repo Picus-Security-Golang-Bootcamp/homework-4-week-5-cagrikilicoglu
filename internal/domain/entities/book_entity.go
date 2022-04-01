@@ -38,7 +38,7 @@ func (b *Book) AfterDelete(tx *gorm.DB) error {
 	return nil
 }
 
-// AfterDelete: Print book name after it is deleted with a success message.
+// AfterOrder: Print book name after it is ordered with a success message.
 func (b *Book) AfterOrder(num int) {
 	fmt.Printf("Book %s of quantity %d is succesfully ordered...\n", b.Name, num)
 }

@@ -65,7 +65,7 @@ The database are created by the app. The book and author data is read from csv f
 
         `DELETE /books/delete?id=4`
 
-### Order books from the database by their ID and of preferred quantity.
+#### Order books from the database by their ID and of preferred quantity.
 
     `PATCH /books/order?id={id}&quantity={quantity}`
 
